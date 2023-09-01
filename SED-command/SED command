@@ -1,0 +1,148 @@
+
+
+## as -n option is missing , it will print complete contet of dummy-file
+## when you are using sed command for printing -n option is very important 
+sed '1p' dummy-file
+root:x:0:0:root:/root:/bin/bash
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+adm:x:3:4:adm:/var/adm:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+halt:x:7:0:halt:/sbin:/sbin/halt
+mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+operator:x:11:0:operator:/root:/sbin/nologin
+games:x:12:100:games:/usr/games:/sbin/nologin
+ftp:x:14:50:FTP User:/var/ftp:/sbin/nologin
+nobody:x:65534:65534:Kernel Overflow User:/:/sbin/nologin
+systemd-coredump:x:999:997:systemd Core Dumper:/:/sbin/nologin
+dbus:x:81:81:System message bus:/:/sbin/nologin
+polkitd:x:998:996:User for polkitd:/:/sbin/nologin
+tss:x:59:59:Account used for TPM access:/dev/null:/sbin/nologin
+sssd:x:997:994:User for sssd:/:/sbin/nologin
+sshd:x:74:74:Privilege-separated SSH:/usr/share/empty.sshd:/sbin/nologin
+chrony:x:996:993::/var/lib/chrony:/sbin/nologin
+systemd-oom:x:991:991:systemd Userspace OOM Killer:/:/usr/sbin/nologin
+avahi:x:70:70:Avahi mDNS/DNS-SD Stack:/var/run/avahi-daemon:/sbin/nologin
+libstoragemgmt:x:990:989:daemon account for libstoragemgmt:/var/run/lsm:/sbin/nologin
+rtkit:x:172:172:RealtimeKit:/proc:/sbin/nologin
+clevis:x:989:988:Clevis Decryption Framework unprivileged user:/var/cache/clevis:/usr/sbin/nologin
+pipewire:x:988:987:PipeWire System Daemon:/var/run/pipewire:/sbin/nologin
+colord:x:987:985:User for colord:/var/lib/colord:/sbin/nologin
+setroubleshoot:x:986:984:SELinux troubleshoot server:/var/lib/setroubleshoot:/sbin/nologin
+geoclue:x:985:983:User for geoclue:/var/lib/geoclue:/sbin/nologin
+flatpak:x:984:982:User for flatpak system helper:/:/sbin/nologin
+gdm:x:42:42::/var/lib/gdm:/sbin/nologin
+cockpit-ws:x:983:981:User for cockpit web service:/nonexisting:/sbin/nologin
+cockpit-wsinstance:x:982:980:User for cockpit-ws instances:/nonexisting:/sbin/nologin
+gnome-initial-setup:x:981:979::/run/gnome-initial-setup/:/sbin/nologin
+tcpdump:x:72:72::/:/sbin/nologin
+dnsmasq:x:980:978:Dnsmasq DHCP and DNS server:/var/lib/dnsmasq:/sbin/nologin
+
+## this will print 1st line
+sed -n  '1p' dummy-file
+root:x:0:0:root:/root:/bin/bash
+
+## this will print 5th line
+sed -n  '5p' dummy-file
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+
+## this will print 1st to 5th line
+sed -n  '1,5p' dummy-file
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+adm:x:3:4:adm:/var/adm:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+
+## this will print 1st and 5th line only 
+sed -n '1p;5p' dummy-file
+root:x:0:0:root:/root:/bin/bash
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+
+
+## this will print last line of the file
+dnsmasq:x:980:978:Dnsmasq DHCP and DNS server:/var/lib/dnsmasq:/sbin/nologin
+
+
+## now summpose if your want to print 1st line and last line 
+## you can use 
+sed -n '1p;$p' dummy-file
+root:x:0:0:root:/root:/bin/bash
+dnsmasq:x:980:978:Dnsmasq DHCP and DNS server:/var/lib/dnsmasq:/sbin/nologin
+
+## but if your want to see with line number above command to be sure , you can use like below 
+cat -n dummy-file | sed -n '1p;$p'
+     1	root:x:0:0:root:/root:/bin/bash
+    36	dnsmasq:x:980:978:Dnsmasq DHCP and DNS server:/var/lib/dnsmasq:/sbin/nologin
+
+## don't use like this  cat -n dummy-file | sed -n '1p;$p' dummy-file 
+
+
+## now for example if you want to print 1st line , 5th line , 10th line and 15th to last line 
+## you can use below command  , and this command will also give line number
+
+cat -n dummy-file | sed -n '1p;5p;10p;15,$p'
+     1	root:x:0:0:root:/root:/bin/bash
+     5	lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+    10	operator:x:11:0:operator:/root:/sbin/nologin
+    15	dbus:x:81:81:System message bus:/:/sbin/nologin
+    16	polkitd:x:998:996:User for polkitd:/:/sbin/nologin
+    17	tss:x:59:59:Account used for TPM access:/dev/null:/sbin/nologin
+    18	sssd:x:997:994:User for sssd:/:/sbin/nologin
+    19	sshd:x:74:74:Privilege-separated SSH:/usr/share/empty.sshd:/sbin/nologin
+    20	chrony:x:996:993::/var/lib/chrony:/sbin/nologin
+    21	systemd-oom:x:991:991:systemd Userspace OOM Killer:/:/usr/sbin/nologin
+    22	avahi:x:70:70:Avahi mDNS/DNS-SD Stack:/var/run/avahi-daemon:/sbin/nologin
+    23	libstoragemgmt:x:990:989:daemon account for libstoragemgmt:/var/run/lsm:/sbin/nologin
+    24	rtkit:x:172:172:RealtimeKit:/proc:/sbin/nologin
+    25	clevis:x:989:988:Clevis Decryption Framework unprivileged user:/var/cache/clevis:/usr/sbin/nologin
+    26	pipewire:x:988:987:PipeWire System Daemon:/var/run/pipewire:/sbin/nologin
+    27	colord:x:987:985:User for colord:/var/lib/colord:/sbin/nologin
+    28	setroubleshoot:x:986:984:SELinux troubleshoot server:/var/lib/setroubleshoot:/sbin/nologin
+    29	geoclue:x:985:983:User for geoclue:/var/lib/geoclue:/sbin/nologin
+    30	flatpak:x:984:982:User for flatpak system helper:/:/sbin/nologin
+    31	gdm:x:42:42::/var/lib/gdm:/sbin/nologin
+    32	cockpit-ws:x:983:981:User for cockpit web service:/nonexisting:/sbin/nologin
+    33	cockpit-wsinstance:x:982:980:User for cockpit-ws instances:/nonexisting:/sbin/nologin
+    34	gnome-initial-setup:x:981:979::/run/gnome-initial-setup/:/sbin/nologin
+    35	tcpdump:x:72:72::/:/sbin/nologin
+    36	dnsmasq:x:980:978:Dnsmasq DHCP and DNS server:/var/lib/dnsmasq:/sbin/nologin
+
+## if you want without line number you can use like below 
+sed -n '1p;5p;10p;15,$p' dummy-file
+
+root:x:0:0:root:/root:/bin/bash
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+operator:x:11:0:operator:/root:/sbin/nologin
+dbus:x:81:81:System message bus:/:/sbin/nologin
+polkitd:x:998:996:User for polkitd:/:/sbin/nologin
+tss:x:59:59:Account used for TPM access:/dev/null:/sbin/nologin
+sssd:x:997:994:User for sssd:/:/sbin/nologin
+sshd:x:74:74:Privilege-separated SSH:/usr/share/empty.sshd:/sbin/nologin
+chrony:x:996:993::/var/lib/chrony:/sbin/nologin
+systemd-oom:x:991:991:systemd Userspace OOM Killer:/:/usr/sbin/nologin
+avahi:x:70:70:Avahi mDNS/DNS-SD Stack:/var/run/avahi-daemon:/sbin/nologin
+libstoragemgmt:x:990:989:daemon account for libstoragemgmt:/var/run/lsm:/sbin/nologin
+rtkit:x:172:172:RealtimeKit:/proc:/sbin/nologin
+clevis:x:989:988:Clevis Decryption Framework unprivileged user:/var/cache/clevis:/usr/sbin/nologin
+pipewire:x:988:987:PipeWire System Daemon:/var/run/pipewire:/sbin/nologin
+colord:x:987:985:User for colord:/var/lib/colord:/sbin/nologin
+setroubleshoot:x:986:984:SELinux troubleshoot server:/var/lib/setroubleshoot:/sbin/nologin
+geoclue:x:985:983:User for geoclue:/var/lib/geoclue:/sbin/nologin
+flatpak:x:984:982:User for flatpak system helper:/:/sbin/nologin
+gdm:x:42:42::/var/lib/gdm:/sbin/nologin
+cockpit-ws:x:983:981:User for cockpit web service:/nonexisting:/sbin/nologin
+cockpit-wsinstance:x:982:980:User for cockpit-ws instances:/nonexisting:/sbin/nologin
+gnome-initial-setup:x:981:979::/run/gnome-initial-setup/:/sbin/nologin
+tcpdump:x:72:72::/:/sbin/nologin
+dnsmasq:x:980:978:Dnsmasq DHCP and DNS server:/var/lib/dnsmasq:/sbin/nologin
+
+
+
+
+
+
+
