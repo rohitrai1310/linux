@@ -141,8 +141,69 @@ tcpdump:x:72:72::/:/sbin/nologin
 dnsmasq:x:980:978:Dnsmasq DHCP and DNS server:/var/lib/dnsmasq:/sbin/nologin
 
 
+## lets see a exmple using a sed 
+## what if we have to get line 2 to 5 in lsblk output 
+
+[root@rhel9-1 ~]# lsblk
+NAME          MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+sda             8:0    0  6.8G  1 disk
+vda           252:0    0   40G  0 disk
+├─vda1        252:1    0  600M  0 part /boot/efi
+├─vda2        252:2    0    1G  0 part /boot
+└─vda3        252:3    0 38.4G  0 part
+  ├─rhel-root 253:0    0 35.5G  0 lvm  /
+  └─rhel-swap 253:1    0    3G  0 lvm  [SWAP]
+
+## command
+[root@rhel9-1 ~]# lsblk | sed -n '2,5p'
+sda             8:0    0  6.8G  1 disk
+vda           252:0    0   40G  0 disk
+├─vda1        252:1    0  600M  0 part /boot/efi
+├─vda2        252:2    0    1G  0 part /boot
 
 
+[root@rhel9-1 ~]# lsblk | cat -n
+     1	NAME          MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+     2	sda             8:0    0  6.8G  1 disk
+     3	vda           252:0    0   40G  0 disk
+     4	├─vda1        252:1    0  600M  0 part /boot/efi
+     5	├─vda2        252:2    0    1G  0 part /boot
+     6	└─vda3        252:3    0 38.4G  0 part
+     7	  ├─rhel-root 253:0    0 35.5G  0 lvm  /
+     8	  └─rhel-swap 253:1    0    3G  0 lvm  [SWAP]
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# lsblk | cat -n | sed -n '2,5p'
+     2	sda             8:0    0  6.8G  1 disk
+     3	vda           252:0    0   40G  0 disk
+     4	├─vda1        252:1    0  600M  0 part /boot/efi
+     5	├─vda2        252:2    0    1G  0 part /boot
+[root@rhel9-1 ~]#
 
 
+## one more example where you need header 
 
+[root@rhel9-1 ~]# lsblk | sed -n '1p;4,6p'
+NAME          MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+├─vda1        252:1    0  600M  0 part /boot/efi
+├─vda2        252:2    0    1G  0 part /boot
+└─vda3        252:3    0 38.4G  0 part
+
+
+## now lets move forward and see more powerfull operation of sed command 
+## we can print a line which contains a specific word , like grep 
+[root@rhel9-1 ~]# grep root dummy-file
+root:x:0:0:root:/root:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+
+[root@rhel9-1 ~]# sed -n  '/root/p' dummy-file
+root:x:0:0:root:/root:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+
+[root@rhel9-1 ~]# ifconfig | sed -n '/inet/p'
+        inet 192.168.71.6  netmask 255.255.255.0  broadcast 192.168.71.255
+        inet6 fd81:7b2b:51a7:a746:b4f8:74ff:fe4e:204c  prefixlen 64  scopeid 0x0<global>
+        inet6 fe80::b4f8:74ff:fe4e:204c  prefixlen 64  scopeid 0x20<link>
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+
+    
