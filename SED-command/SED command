@@ -207,3 +207,39 @@ operator:x:11:0:operator:/root:/sbin/nologin
         inet6 ::1  prefixlen 128  scopeid 0x10<host>
 
     
+## now lets see delete operation using sed command 
+
+[root@rhel9-1 ~]# cat dummy-file | sed -n '1,10p' > test-file
+[root@rhel9-1 ~]# cat test-file
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+adm:x:3:4:adm:/var/adm:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+halt:x:7:0:halt:/sbin:/sbin/halt
+mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+operator:x:11:0:operator:/root:/sbin/nologin
+
+
+
+[root@rhel9-1 ~]# sed '2d' test-file
+root:x:0:0:root:/root:/bin/bash
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+adm:x:3:4:adm:/var/adm:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+halt:x:7:0:halt:/sbin:/sbin/halt
+mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+operator:x:11:0:operator:/root:/sbin/nologin
+[root@rhel9-1 ~]#
+
+## 2!d works same as 2p 
+[root@rhel9-1 ~]# sed '2!d' test-file
+bin:x:1:1:bin:/bin:/sbin/nologin
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# sed -n '2p' test-file
+bin:x:1:1:bin:/bin:/sbin/nologin
+[root@rhel9-1 ~]#
