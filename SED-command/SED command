@@ -1,3 +1,4 @@
+################################ print operations ################################
 
 
 ## as -n option is missing , it will print complete contet of dummy-file
@@ -64,6 +65,7 @@ lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
 
 
 ## this will print last line of the file
+sed -n '$p' dummy-file
 dnsmasq:x:980:978:Dnsmasq DHCP and DNS server:/var/lib/dnsmasq:/sbin/nologin
 
 
@@ -195,6 +197,8 @@ NAME          MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
 root:x:0:0:root:/root:/bin/bash
 operator:x:11:0:operator:/root:/sbin/nologin
 
+
+
 [root@rhel9-1 ~]# sed -n  '/root/p' dummy-file
 root:x:0:0:root:/root:/bin/bash
 operator:x:11:0:operator:/root:/sbin/nologin
@@ -206,7 +210,7 @@ operator:x:11:0:operator:/root:/sbin/nologin
         inet 127.0.0.1  netmask 255.0.0.0
         inet6 ::1  prefixlen 128  scopeid 0x10<host>
 
-    
+ ################################ delete operations ################################   
 ## now lets see delete operation using sed command 
 
 [root@rhel9-1 ~]# cat dummy-file | sed -n '1,10p' > test-file
@@ -223,7 +227,17 @@ mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
 operator:x:11:0:operator:/root:/sbin/nologin
 
 
+### can we print not by line number but with according to any pattern ?
+## yes , check below 
 
+[root@rhel9-1 ~]# lsblk | sed -n '/boot/p'
+├─vda1        252:1    0  600M  0 part /boot/efi
+├─vda2        252:2    0    1G  0 part /boot
+
+
+
+
+## this command will not delete in file , it will only delete on the screen
 [root@rhel9-1 ~]# sed '2d' test-file
 root:x:0:0:root:/root:/bin/bash
 daemon:x:2:2:daemon:/sbin:/sbin/nologin
@@ -243,3 +257,294 @@ bin:x:1:1:bin:/bin:/sbin/nologin
 [root@rhel9-1 ~]# sed -n '2p' test-file
 bin:x:1:1:bin:/bin:/sbin/nologin
 [root@rhel9-1 ~]#
+
+
+
+## now lets delete line into the file , use -i option 
+## -i into the file 
+## so first test delete line without -i option then delete into file 
+## alway take backup of any file on which you are going to do any operation 
+[root@rhel9-1 ~]# sed -i '2d' test-file
+[root@rhel9-1 ~]# cat test-file
+root:x:0:0:root:/root:/bin/bash
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+adm:x:3:4:adm:/var/adm:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+halt:x:7:0:halt:/sbin:/sbin/halt
+mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+operator:x:11:0:operator:/root:/sbin/nologin
+
+
+## line 1 to 3 delete into the file 
+[root@rhel9-1 ~]# sed -i '1,3d' test-file
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# cat test-file
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+halt:x:7:0:halt:/sbin:/sbin/halt
+mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+operator:x:11:0:operator:/root:/sbin/nologin
+
+## except 1 and 2 other line will be delted 
+[root@rhel9-1 ~]# sed -i '1,2!d' test-file
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# cat test-file
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+
+### Note: sed -i option you can perform on any file ,not on any command 
+[root@rhel9-1 ~]# lsblk
+NAME          MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+sda             8:0    0  6.8G  1 disk
+vda           252:0    0   40G  0 disk
+├─vda1        252:1    0  600M  0 part /boot/efi
+├─vda2        252:2    0    1G  0 part /boot
+└─vda3        252:3    0 38.4G  0 part
+  ├─rhel-root 253:0    0 35.5G  0 lvm  /
+  └─rhel-swap 253:1    0    3G  0 lvm  [SWAP]
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# lsblk | grep -E 'vda1|vda2'
+├─vda1        252:1    0  600M  0 part /boot/efi
+├─vda2        252:2    0    1G  0 part /boot
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# lsblk | grep -E 'vda1|vda2' | sed '1d'
+├─vda2        252:2    0    1G  0 part /boot
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# lsblk | grep -E 'vda1|vda2' | sed -i '1d'
+sed: no input files  ### cehck this 
+[root@rhel9-1 ~]#
+
+################################ insert operations ################################
+
+## now lets see how to insert  any line after any line in a file 
+## i before the line 
+## a after the line 
+
+## this will add hey there after line number 3
+[root@rhel9-1 ~]# sed  '3a hey there' test-file
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+hey there
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+
+## this will add hey there before line number 3
+[root@rhel9-1 ~]# sed  '3i hey there' test-file
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+hey there
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+
+## but notice there is no change into the file 
+[root@rhel9-1 ~]# cat test-file
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+[root@rhel9-1 ~]#
+
+## to make changes into the file use -i after sed and outside of ''
+
+[root@rhel9-1 ~]# sed -i  '3i hey there' test-file
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# cat test-file
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+hey there
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+[root@rhel9-1 ~]#
+
+[root@rhel9-1 ~]# sed -i  '3a hey there' test-file
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# cat test-file
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+hey there
+hey there
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+[root@rhel9-1 ~]#
+
+
+### this will replace root with admin which is coming at second number 
+## in second line there is no second root so no replacement
+[root@rhel9-1 ~]# grep root sample | sed 's/root/admin/2'
+root:x:0:0:admin:/root:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+
+## this will replace all root which is coming at 2nd numner and after that
+[root@rhel9-1 ~]# grep root sample | sed 's/root/admin/2g'
+root:x:0:0:admin:/admin:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+
+
+
+################################ replace operations ################################
+##lets create a sample file to test replace operation
+[root@rhel9-1 ~]# head /etc/passwd > sample
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# cat sample
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+adm:x:3:4:adm:/var/adm:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+halt:x:7:0:halt:/sbin:/sbin/halt
+mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+operator:x:11:0:operator:/root:/sbin/nologin
+
+##we wnat to repalce root with admin 
+[root@rhel9-1 ~]# grep root sample
+root:x:0:0:root:/root:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+
+## this will replace only one root with admin in a line 
+[root@rhel9-1 ~]# sed 's/root/admin/' sample
+admin:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+adm:x:3:4:adm:/var/adm:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+halt:x:7:0:halt:/sbin:/sbin/halt
+mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+operator:x:11:0:operator:/admin:/sbin/nologin
+
+## use g 
+[root@rhel9-1 ~]# sed 's/root/admin/g' sample 
+admin:x:0:0:admin:/admin:/bin/bash
+operator:x:11:0:operator:/admin:/sbin/nologin
+
+## use i for ignore case 
+
+[root@rhel9-1 ~]# sed 's/ROOT/admin/gi' sample 
+admin:x:0:0:admin:/admin:/bin/bash
+operator:x:11:0:operator:/admin:/sbin/nologin
+
+## lets see one more example
+[root@rhel9-1 ~]# grep sync /root/sample | sed 's/sync/network/'
+network:x:5:0:sync:/sbin:/bin/sync
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# grep sync /root/sample | sed 's/sync/network/' | grep -i network
+network:x:5:0:sync:/sbin:/bin/sync
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# grep sync /root/sample | sed 's/sync/network/g' | grep -i network
+network:x:5:0:network:/sbin:/bin/network
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# grep sync /root/sample | sed 's/Sync/network/g' | grep -i network
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# grep sync /root/sample | sed 's/Sync/network/gi' | grep -i network
+network:x:5:0:network:/sbin:/bin/network
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# grep sync /root/sample | sed 's/Sync/network/gi' | grep -i network
+network:x:5:0:network:/sbin:/bin/network
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# grep sync /root/sample; grep sync /root/sample | sed 's/Sync/network/gi' | grep -i network
+sync:x:5:0:sync:/sbin:/bin/sync
+network:x:5:0:network:/sbin:/bin/network
+
+## sed 's/root/network/2' will replace root with network when it appears at 2nd index
+[root@rhel9-1 ~]# grep root sample
+root:x:0:0:root:/root:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+
+## root appears on second index replace with network ,second row has only one root so no change 
+[root@rhel9-1 ~]# grep root sample | sed 's/root/network/2'
+root:x:0:0:network:/root:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+
+## row 1 and 2 both changed 
+[root@rhel9-1 ~]# grep root sample | sed 's/root/network/1'
+network:x:0:0:root:/root:/bin/bash
+operator:x:11:0:operator:/network:/sbin/nologin
+
+## by default 1 
+[root@rhel9-1 ~]# grep root sample | sed 's/root/network/'
+network:x:0:0:root:/root:/bin/bash
+operator:x:11:0:operator:/network:/sbin/nologin
+
+## leave first root and replace all root with network from 2nd 
+[root@rhel9-1 ~]# grep root sample | sed 's/root/network/2g'
+root:x:0:0:network:/network:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+
+
+
+################################
+### lets see a advance example of replacing example 
+## for example we have output of ifconfig like below 
+[root@rhel9-1 ~]# ifconfig
+enp0s1: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.71.6  netmask 255.255.255.0  broadcast 192.168.71.255
+        inet6 fd81:7b2b:51a7:a746:b4f8:74ff:fe4e:204c  prefixlen 64  scopeid 0x0<global>
+        inet6 fe80::b4f8:74ff:fe4e:204c  prefixlen 64  scopeid 0x20<link>
+        ether b6:f8:74:4e:20:4c  txqueuelen 1000  (Ethernet)
+        RX packets 22777  bytes 5717179 (5.4 MiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 10989  bytes 1204213 (1.1 MiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 10  bytes 1576 (1.5 KiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 10  bytes 1576 (1.5 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+
+### now we want lines only which have only and only inet word 
+## use -w with grep for exact word 
+[root@rhel9-1 ~]# ifconfig | grep -w inet
+        inet 192.168.71.6  netmask 255.255.255.0  broadcast 192.168.71.255
+        inet 127.0.0.1  netmask 255.0.0.0
+
+## now we want to replace inet word with ipaddr 
+
+[root@rhel9-1 ~]# ifconfig | grep -w inet | sed 's/inet/ipadder/'
+        ipadder 192.168.71.6  netmask 255.255.255.0  broadcast 192.168.71.255
+        ipadder 127.0.0.1  netmask 255.0.0.0
+
+## now we want to replace inet word with ipaddr and netmask with subnetmask 
+[root@rhel9-1 ~]# ifconfig | grep -w inet | sed 's/inet/ipadder/;s/netmask/subnetmask/'
+        ipadder 192.168.71.6  subnetmask 255.255.255.0  broadcast 192.168.71.255
+        ipadder 127.0.0.1  subnetmask 255.0.0.0
+
+
+## one more operation of using option g i.e. global 
+## root is comming multiple times in first line 
+[root@rhel9-1 ~]# grep root /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+ 
+
+[root@rhel9-1 ~]# grep root /etc/passwd | sed 's/root/network/'
+network:x:0:0:root:/root:/bin/bash   ## only one root replace with network 
+operator:x:11:0:operator:/network:/sbin/nologin
+
+## use g for global replace 
+[root@rhel9-1 ~]# grep root /etc/passwd | sed 's/root/network/g'
+network:x:0:0:network:/network:/bin/bash
+operator:x:11:0:operator:/network:/sbin/nologin
+[root@rhel9-1 ~]#
+
+
