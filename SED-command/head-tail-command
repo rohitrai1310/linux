@@ -1,0 +1,96 @@
+##
+head : it prints by default 10 lines from the top of any file or from any command output
+
+tail  : it prints by default 10 lines from the bottom of any file or from any command output
+
+## syntex 
+
+head <options> <filename>
+
+tail <options> <filename>
+
+        or 
+<any-command> | head <options>
+<any-command> | tail <options>
+
+## top 10 line from top
+head /etc/passwd or head -n 10 /etc/passwd
+
+## bottom 10 line from top
+tail  /etc/passwd  or tail  -n 10 /etc/passwd
+
+## top 4 line from top 
+head -n 4 /etc/passwd
+
+## top 4 line with line number and bottom 4 line with line number 
+[root@rhel9-1 ~]# cat -n /etc/passwd | head -n 4 ; cat -n /etc/passwd | tail -n 4
+     1	root:x:0:0:root:/root:/bin/bash
+     2	bin:x:1:1:bin:/bin:/sbin/nologin
+     3	daemon:x:2:2:daemon:/sbin:/sbin/nologin
+     4	adm:x:3:4:adm:/var/adm:/sbin/nologin
+    34	gnome-initial-setup:x:981:979::/run/gnome-initial-setup/:/sbin/nologin
+    35	tcpdump:x:72:72::/:/sbin/nologin
+    36	dnsmasq:x:980:978:Dnsmasq DHCP and DNS server:/var/lib/dnsmasq:/sbin/nologin
+    37	rohit:x:1000:1000:rohit:/home/rohit:/bin/bash
+
+## this command will add top 4 line in test file and bottom 4 line test file but will not print output on the  screen 
+cat -n /etc/passwd | head -n 4 > test; cat -n /etc/passwd | tail -n 4  >> test
+
+## this command will add top 4 line in test file and bottom 4 line test file but will not print output on the screen 
+cat -n /etc/passwd | head -n 4 | tee test; cat -n /etc/passwd | tail -n 4 | tee -a test
+
+##  head and tail command can also work with command 
+[root@rhel9-1 ~]# lsblk | head -n 3
+NAME          MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+sda             8:0    0  6.8G  1 disk
+vda           252:0    0   40G  0 disk
+[root@rhel9-1 ~]#
+
+[root@rhel9-1 ~]# lsblk | tail -n 3
+└─vda3        252:3    0 38.4G  0 part
+  ├─rhel-root 253:0    0 35.5G  0 lvm  /
+  └─rhel-swap 253:1    0    3G  0 lvm  [SWAP]
+[root@rhel9-1 ~]#
+
+## line number 21 to 25
+
+[root@rhel9-1 ~]# cat -n /etc/passwd | head -n 25 | tail -n 5
+    21	systemd-oom:x:991:991:systemd Userspace OOM Killer:/:/usr/sbin/nologin
+    22	avahi:x:70:70:Avahi mDNS/DNS-SD Stack:/var/run/avahi-daemon:/sbin/nologin
+    23	libstoragemgmt:x:990:989:daemon account for libstoragemgmt:/var/run/lsm:/sbin/nologin
+    24	rtkit:x:172:172:RealtimeKit:/proc:/sbin/nologin
+    25	clevis:x:989:988:Clevis Decryption Framework unprivileged user:/var/cache/clevis:/usr/sbin/nologin
+
+## line number 21 to 25  and 31 to 32
+
+[root@rhel9-1 ~]# cat -n /etc/passwd | head -n 25 | tail -n 5 ;  cat -n /etc/passwd | head -n 32  | tail -n 2
+    21	systemd-oom:x:991:991:systemd Userspace OOM Killer:/:/usr/sbin/nologin
+    22	avahi:x:70:70:Avahi mDNS/DNS-SD Stack:/var/run/avahi-daemon:/sbin/nologin
+    23	libstoragemgmt:x:990:989:daemon account for libstoragemgmt:/var/run/lsm:/sbin/nologin
+    24	rtkit:x:172:172:RealtimeKit:/proc:/sbin/nologin
+    25	clevis:x:989:988:Clevis Decryption Framework unprivileged user:/var/cache/clevis:/usr/sbin/nologin
+    31	gdm:x:42:42::/var/lib/gdm:/sbin/nologin
+    32	cockpit-ws:x:983:981:User for cockpit web service:/nonexisting:/sbin/nologin
+
+## head and tail command is best practice for picking line from top and bottom , but not a easy for picking line for range , you need to
+## use more calculation for desired output but using sed it is very simple to print  
+## sed is better option then head and tail 
+
+[root@rhel9-1 ~]# cat -n /etc/passwd | sed -n '21,25p' ; cat -n /etc/passwd | sed -n '31,32p'
+    21	systemd-oom:x:991:991:systemd Userspace OOM Killer:/:/usr/sbin/nologin
+    22	avahi:x:70:70:Avahi mDNS/DNS-SD Stack:/var/run/avahi-daemon:/sbin/nologin
+    23	libstoragemgmt:x:990:989:daemon account for libstoragemgmt:/var/run/lsm:/sbin/nologin
+    24	rtkit:x:172:172:RealtimeKit:/proc:/sbin/nologin
+    25	clevis:x:989:988:Clevis Decryption Framework unprivileged user:/var/cache/clevis:/usr/sbin/nologin
+    31	gdm:x:42:42::/var/lib/gdm:/sbin/nologin
+    32	cockpit-ws:x:983:981:User for cockpit web service:/nonexisting:/sbin/nologin
+[root@rhel9-1 ~]#
+
+#to see logs continuously on screen 
+
+tail -f /var/log/secure 
+
+#at a time it can read two file 
+
+tail -f /var/log/secure  /var/log/message
+
