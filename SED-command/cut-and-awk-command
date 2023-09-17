@@ -1,0 +1,215 @@
+
+## cut and awk command 
+
+cut : it is use to cut any records by using column or fields and char from any file or from any 
+command output 
+
+cut <options> <filename>
+
+any-command | cut <option>
+
+options:
+-c cut by character 
+-f cut by fields 
+-d delimeter or to define any symbol to understand about fileds 
+
+## -f option will not work without option d 
+
+: , ; space these symbols can be consider as delimeter 
+
+[root@rhel9-1 ~]# tail -n5 /etc/passwd
+user1:x:1001:1001::/home/user1:/bin/bash
+user2:x:1002:1002::/home/user2:/bin/bash
+user3:x:1003:1003::/home/user3:/bin/bash
+user4:x:1004:1004::/home/user4:/bin/bash
+user5:x:1005:1005::/home/user5:/bin/bash
+
+## this will cut 1 and 4 char from lines
+[root@rhel9-1 ~]# tail -n5 /etc/passwd | cut -c1,4
+ur
+ur
+ur
+ur
+ur
+
+## this will cut 1 to 5  char from lines 
+[root@rhel9-1 ~]# tail -n5 /etc/passwd | cut -c1-5
+user1
+user2
+user3
+user4
+user5
+
+## now lets see how to cut by field 
+
+[root@rhel9-1 ~]# tail -n5 /etc/passwd | cut -d ':' -f1
+user1
+user2
+user3
+user4
+user5
+[root@rhel9-1 ~]#
+## field 1 and 3 
+[root@rhel9-1 ~]# tail -n5 /etc/passwd | cut -d ':' -f1,3
+user1:1001
+user2:1002
+user3:1003
+user4:1004
+user5:1005
+[root@rhel9-1 ~]#
+
+## field 1 to 3 
+[root@rhel9-1 ~]# tail -n5 /etc/passwd | cut -d ':' -f1-3
+user1:x:1001
+user2:x:1002
+user3:x:1003
+user4:x:1004
+user5:x:1005
+[root@rhel9-1 ~]#
+
+## field 1 , 3 to 5 , and 6 
+[root@rhel9-1 ~]# tail -n5 /etc/passwd | cut -d ':' -f1,3-5,6
+user1:1001:1001::/home/user1
+user2:1002:1002::/home/user2
+user3:1003:1003::/home/user3
+user4:1004:1004::/home/user4
+user5:1005:1005::/home/user5
+[root@rhel9-1 ~]#
+
+
+[root@rhel9-1 ~]# cat new
+this is first line
+this is second line
+this is third line
+this is fourth line
+
+[root@rhel9-1 ~]# cut -d' ' -f1,3 new
+this first
+this second
+this third
+this fourth
+
+33:00
+
+##lets see awk command 
+
+[root@rhel9-1 ~]# tail -n5 /etc/passwd
+user1:x:1001:1001::/home/user1:/bin/bash
+user2:x:1002:1002::/home/user2:/bin/bash
+user3:x:1003:1003::/home/user3:/bin/bash
+user4:x:1004:1004::/home/user4:/bin/bash
+user5:x:1005:1005::/home/user5:/bin/bash
+
+## as there is : is comming as separator , we will try to get fields 
+
+## so when we haven't give any filed separator
+
+[root@rhel9-1 ~]# tail -n5 /etc/passwd | awk '{print $1,$2}'
+user1:x:1001:1001::/home/user1:/bin/bash
+user2:x:1002:1002::/home/user2:/bin/bash
+user3:x:1003:1003::/home/user3:/bin/bash
+user4:x:1004:1004::/home/user4:/bin/bash
+user5:x:1005:1005::/home/user5:/bin/bash
+
+## we need to provide -F option 
+
+[root@rhel9-1 ~]# tail -n5 /etc/passwd | awk -F':' '{print $1,$2}'
+user1 x
+user2 x
+user3 x
+user4 x
+user5 x
+
+[root@rhel9-1 ~]# tail -n5 /etc/passwd | awk -F':' '{print $1,$2,$4}'
+user1 x 1001
+user2 x 1002
+user3 x 1003
+user4 x 1004
+user5 x 1005
+
+##but see the difference between cut and awk command 
+
+[root@rhel9-1 ~]# tail -n5 /etc/passwd | cut -d':' -f1-2,4
+user1:x:1001
+user2:x:1002
+user3:x:1003
+user4:x:1004
+user5:x:1005 
+
+## in cut command : is not going away it is comming in output so bring same o/p in awk command 
+## we can use OFS option 
+
+[root@rhel9-1 ~]# tail -n5 /etc/passwd | awk -F':' '{print $1,$2,$4}' OFS=':'
+user1:x:1001
+user2:x:1002
+user3:x:1003
+user4:x:1004
+user5:x:1005
+
+
+### at some places we can see FS after '{print$1,$2}' instead of awk -F option before '{print$1,$2}' , both have same meaning and output 
+## you can use anyone 
+
+## FS = field separator 
+
+[root@rhel9-1 ~]# tail -n5 /etc/passwd | awk '{print$1 ,$2 }' FS=':'
+user1 x
+user2 x
+user3 x
+user4 x
+user5 x
+## then we can use OFS output field separator
+[root@rhel9-1 ~]# tail -n5 /etc/passwd | awk '{print$1 ,$2 }' FS=':' OFS='>>>'
+user1>>>x
+user2>>>x
+user3>>>x
+user4>>>x
+user5>>>x
+
+## so why do use awk command when we have cut command 
+## see this , in below example if we take seperator as space , it is uneven 
+
+[root@rhel9-1 ~]# df -h
+Filesystem             Size  Used Avail Use% Mounted on
+devtmpfs               4.0M     0  4.0M   0% /dev
+tmpfs                  1.3G     0  1.3G   0% /dev/shm
+tmpfs                  529M  7.4M  521M   2% /run
+/dev/mapper/rhel-root   36G  4.1G   32G  12% /
+/dev/vda2             1014M  213M  802M  21% /boot
+/dev/vda1              599M  7.0M  592M   2% /boot/efi
+tmpfs                  265M   36K  265M   1% /run/user/0
+
+## filed 2 is not comming 
+[root@rhel9-1 ~]# df -h | cut -d' ' -f1,2
+Filesystem
+devtmpfs
+tmpfs
+tmpfs
+/dev/mapper/rhel-root
+/dev/vda2
+/dev/vda1
+tmpfs
+
+[root@rhel9-1 ~]# df -h  | awk '{print$1,$2,$3}'
+Filesystem Size Used
+devtmpfs 4.0M 0
+tmpfs 1.3G 0
+tmpfs 529M 7.4M
+/dev/mapper/rhel-root 36G 4.1G
+/dev/vda2 1014M 213M
+/dev/vda1 599M 7.0M
+tmpfs 265M 36K
+
+## to make output more readable use coulumn -t option (tab)
+
+[root@rhel9-1 ~]# df -h  | awk '{print$1,$2,$3}' | column -t
+Filesystem             Size   Used
+devtmpfs               4.0M   0
+tmpfs                  1.3G   0
+tmpfs                  529M   7.4M
+/dev/mapper/rhel-root  36G    4.1G
+/dev/vda2              1014M  213M
+/dev/vda1              599M   7.0M
+tmpfs                  265M   36K
+
+## so in nutshell whenever you are facing issue with delimeter you can use awk option instead of cut 
