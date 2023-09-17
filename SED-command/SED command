@@ -486,6 +486,90 @@ operator:x:11:0:operator:/network:/sbin/nologin
 root:x:0:0:network:/network:/bin/bash
 operator:x:11:0:operator:/root:/sbin/nologin
 
+## 1s means change only in 1st line and there is no g so only one root with network , not for any other line 
+[root@rhel9-1 ~]# grep root /root/sample | sed '1s/root/network/'
+network:x:0:0:root:/root:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+
+## g option with 1s , will change all root with network in 1st line  
+[root@rhel9-1 ~]# grep root /root/sample | sed '1s/root/network/g'
+network:x:0:0:network:/network:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+
+
+## grep nologin sample | sed '1,3s/nologin/network/' will replace nologin with network from 1 to 3 line 
+
+[root@rhel9-1 ~]# grep nologin sample
+bin:x:1:1:bin:/bin:/sbin/nologin
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+adm:x:3:4:adm:/var/adm:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+operator:x:11:0:operator:/root:/sbin/nologin
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# grep nologin sample | sed '1,3s/nologin/network/'
+bin:x:1:1:bin:/bin:/sbin/network
+daemon:x:2:2:daemon:/sbin:/sbin/network
+adm:x:3:4:adm:/var/adm:/sbin/network
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+operator:x:11:0:operator:/root:/sbin/nologin
+
+## now lets replace multiple item 
+
+## for below we want to replace inet with ipaddr and ether with macaddress
+
+[root@rhel9-1 ~]# ifconfig | egrep -w 'inet|ether'
+        inet 192.168.71.6  netmask 255.255.255.0  broadcast 192.168.71.255
+        ether b6:f8:74:4e:20:4c  txqueuelen 1000  (Ethernet)
+        inet 127.0.0.1  netmask 255.0.0.0
+
+
+[root@rhel9-1 ~]# ifconfig | egrep -w 'inet|ether' | sed -e 's/inet/ipaddr/g' -e 's/ether/macaddr/g'
+        ipaddr 192.168.71.6  netmask 255.255.255.0  broadcast 192.168.71.255
+        macaddr b6:f8:74:4e:20:4c  txqueuelen 1000  (Ethernet)
+        ipaddr 127.0.0.1  netmask 255.0.0.0
+
+                                        OR
+
+[root@rhel9-1 ~]# ifconfig | egrep -w 'inet|ether' | sed 's/inet/ipaddr/g;s/ether/macaddr/g'
+        ipaddr 192.168.71.6  netmask 255.255.255.0  broadcast 192.168.71.255
+        macaddr b6:f8:74:4e:20:4c  txqueuelen 1000  (Ethernet)
+        ipaddr 127.0.0.1  netmask 255.0.0.0
+
+
+## use -i option to change value in the file 
+[root@rhel9-1 ~]# ifconfig | egrep -w 'inet|ether'  > new-1
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# cat new-1
+        inet 192.168.71.6  netmask 255.255.255.0  broadcast 192.168.71.255
+        ether b6:f8:74:4e:20:4c  txqueuelen 1000  (Ethernet)
+        inet 127.0.0.1  netmask 255.0.0.0
+
+[root@rhel9-1 ~]# sed -i 's/inet/ipaddr/g;s/ether/macaddr/g' new-1
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# cat new-1
+        ipaddr 192.168.71.6  netmask 255.255.255.0  broadcast 192.168.71.255
+        macaddr b6:f8:74:4e:20:4c  txqueuelen 1000  (Ethernet)
+        ipaddr 127.0.0.1  netmask 255.0.0.0
+[root@rhel9-1 ~]#
+
+## lets see an example of comment out a line  
+[root@rhel9-1 ~]# sed -n '100p' /etc/sudoers
+root	ALL=(ALL) 	ALL
+
+[root@rhel9-1 ~]# sed -i  '100s/^/#/' /etc/sudoers
+[root@rhel9-1 ~]# sed -n '100p' /etc/sudoers
+#root	ALL=(ALL) 	ALL
+
+## uncomment the line 
+
+[root@rhel9-1 ~]# sed -i  '100s/^#//' /etc/sudoers
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# sed -n '100p' /etc/sudoers
+root	ALL=(ALL) 	ALL
+
 
 
 ################################
@@ -546,5 +630,7 @@ operator:x:11:0:operator:/network:/sbin/nologin
 network:x:0:0:network:/network:/bin/bash
 operator:x:11:0:operator:/network:/sbin/nologin
 [root@rhel9-1 ~]#
+
+
 
 

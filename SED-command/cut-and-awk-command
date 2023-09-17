@@ -151,6 +151,7 @@ user5:x:1005
 ## you can use anyone 
 
 ## FS = field separator 
+##OFS= output field separator
 
 [root@rhel9-1 ~]# tail -n5 /etc/passwd | awk '{print$1 ,$2 }' FS=':'
 user1 x
@@ -212,4 +213,66 @@ tmpfs                  529M   7.4M
 /dev/vda1              599M   7.0M
 tmpfs                  265M   36K
 
-## so in nutshell whenever you are facing issue with delimeter you can use awk option instead of cut 
+## so in nutshell whenever you are facing issue with delimeter and facing issue with cut you can use awk option instead of cut
+
+## one more example , find ipaddress from ifconfig 
+[root@rhel9-1 ~]# ifconfig
+enp0s1: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.71.6  netmask 255.255.255.0  broadcast 192.168.71.255
+        inet6 fd81:7b2b:51a7:a746:b4f8:74ff:fe4e:204c  prefixlen 64  scopeid 0x0<global>
+        inet6 fe80::b4f8:74ff:fe4e:204c  prefixlen 64  scopeid 0x20<link>
+        ether b6:f8:74:4e:20:4c  txqueuelen 1000  (Ethernet)
+        RX packets 14900  bytes 3325380 (3.1 MiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 6448  bytes 727999 (710.9 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 10  bytes 1576 (1.5 KiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 10  bytes 1576 (1.5 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+
+[root@rhel9-1 ~]# ifconfig | grep -iw inet  | awk '{print$2,$4}' | column -t
+192.168.71.6  255.255.255.0
+127.0.0.1     255.0.0.0
+
+##how to store command output in a vraible 
+
+[root@rhel9-1 ~]# a=$(ifconfig | grep -iw inet  | awk '{print$2}' | head -n1)
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# echo $a
+192.168.71.6
+
+
+## whenever we need to store output of any command in a varaible in bash we use =$() 
+
+[root@rhel9-1 ~]# b=date
+[root@rhel9-1 ~]# echo $b
+date
+note when we use =$() then it takes command output of date and stors in b 
+
+[root@rhel9-1 ~]# b=$(date)
+
+[root@rhel9-1 ~]# echo $b
+Fri Sep 15 08:17:53 PM EDT 2023
+
+
+### if there is different type of delimiter 
+
+[root@rhel9-1 ~]# cat hello.sh
+this:is:ram;home
+this;is>shyam;home
+this>is;krishna;home
+this:is:gods;home
+
+
+[root@rhel9-1 ~]# awk -F'[:;>]' '{print$1,$2,$3,$4}' hello.sh | column -t
+this  is  ram      home
+this  is  shyam    home
+this  is  krishna  home
+this  is  gods     home
