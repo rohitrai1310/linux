@@ -1,3 +1,4 @@
+sed (stream editor)
 ################################ print operations ################################
 
 
@@ -264,6 +265,8 @@ bin:x:1:1:bin:/bin:/sbin/nologin
 ## -i into the file 
 ## so first test delete line without -i option then delete into file 
 ## alway take backup of any file on which you are going to do any operation 
+## -i or --in-place  edit files in place
+
 [root@rhel9-1 ~]# sed -i '2d' test-file
 [root@rhel9-1 ~]# cat test-file
 root:x:0:0:root:/root:/bin/bash
@@ -275,6 +278,12 @@ shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
 halt:x:7:0:halt:/sbin:/sbin/halt
 mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
 operator:x:11:0:operator:/root:/sbin/nologin
+
+## will create a backup file 
+##This is a common practice to ensure that you have a 
+##copy of the original file before making irreversible changes when using the sed -i flag.
+
+sed -i.bak '2d' config 
 
 
 ## line 1 to 3 delete into the file 

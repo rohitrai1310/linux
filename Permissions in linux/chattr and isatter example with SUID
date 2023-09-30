@@ -1,0 +1,322 @@
+## chattr  change attributes 
+## chmod   change mode
+
+
+why chattr came into picture when we already have chmod(change mode) and setfacl in linux  ??
+
+
+## lets see an example 
+
+[root@rhel9-1 ~]# ls -ld /data/
+drwxr-xr-x. 2 root root 6 Sep 28 04:00 /data/
+
+here root is the user and root is the group , 
+root is super user and it can delete create anything in data or even delete it 
+
+
+[root@rhel9-1 ~]# ls -ld /data/
+d---------. 2 root root 6 Sep 28 04:00 /data/
+
+even there is no permission , root can create anyfile inside data and even delete it 
+so to create a restriction where even root can't create/delete anything inside a directory chattr came into picture 
+so thorugh chmod and acl you can prevent group user or other use but not root user  
+so it can help in preventing root to delete or change anything 
+
+[root@rhel9-1 ~]# echo hello > /data/test
+[root@rhel9-1 ~]# cat /data/test
+hello
+[root@rhel9-1 ~]# ll /data/
+total 4
+-rw-r--r--. 1 root root 6 Sep 28 04:02 test
+
+[root@rhel9-1 ~]# rm -rf /data/test
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# ll /data/
+total 0
+[root@rhel9-1 ~]# rm -rf /data/
+[root@rhel9-1 ~]# ls -ld /data
+ls: cannot access '/data': No such file or directory
+
+_________________________________________________________________________
+
+notice one thing , super user can delete files even when permission is 000 but normal user can't 
+
+[root@rhel9-1 ~]# su - user1
+[user1@rhel9-1 ~]$ mkdir test
+[user1@rhel9-1 ~]$ touch test/new1
+[user1@rhel9-1 ~]$ ll test/
+-rw-r--r--. 1 user1 user1 0 Sep 28 04:08 new1
+[user1@rhel9-1 ~]$ ll
+drwxr-xr-x. 2 user1 user1 18 Sep 28 04:08 test
+[user1@rhel9-1 ~]$ chmod 000 test
+[user1@rhel9-1 ~]$ ll
+d---------. 2 user1 user1 18 Sep 28 04:08 test
+
+[user1@rhel9-1 ~]$ ll test/
+ls: cannot open directory 'test/': Permission denied
+[user1@rhel9-1 ~]$ rm -rf test/
+rm: cannot remove 'test/': Permission denied
+[user1@rhel9-1 ~]$ rm -rf test
+rm: cannot remove 'test': Permission denied
+
+
+_________________________________________________________________________
+prioroity order : chattr  then setfacl then chmod 
+
+lsattr : to list attribute    : lsattr -d <directory-name>
+chattr : to assign attribute  : chattr +i  <directory-name>   ## -i for removal  ## +R for recursive 
+ 
+ Q.  what if a normal user assign chattr attribute on a directory , can root delete or modify anything into that directory ?
+
+[user1@rhel9-1 ~]$ chattr +i test
+chattr: Operation not permitted while setting flags on test
+
+ A. normal user can't perform chattr operation only root user can perform it or user with sudo permission can perform 
+
+
+ Q. is chattr attribute can be applied on file and folder both ?
+
+ A. Yes chattr attribute can be applied on file and folder both but only by root user or user with sudo permission
+
+ chattr restrict direct and indirect changes into any file or directory 
+
+ indirect :like if you apply chattr on /etc/passwd then user or root will not be able create any user 
+
+
+## example of normal user with sudo permission applying chattr 
+## there is two way a normal user can use chattr attribute 
+
+1. add user in /etc/sudoers (wirte ) or wheel group but using this only that user can run chattr command 
+2. suid 
+
+[user1@rhel9-1 ~]$ ll
+total 0
+-rw-r--r--. 1 user1 user1  0 Sep 28 04:30 abc
+drwxr-xr-x. 2 user1 user1 18 Sep 28 04:08 test
+
+ [user1@rhel9-1 ~]$ sudo chattr +i abc
+ [user1@rhel9-1 ~]$ sudo chattr +i test
+
+[user1@rhel9-1 ~]$ lsattr abc
+----i----------------- abc
+[user1@rhel9-1 ~]$ lsattr test
+---------------------- test/new1
+[user1@rhel9-1 ~]$ lsattr -d test
+----i----------------- test
+
+
+
+[user1@rhel9-1 ~]$ rm -rf abc test
+rm: cannot remove 'abc': Operation not permitted
+rm: cannot remove 'test/new1': Operation not permitted
+[user1@rhel9-1 ~]$
+[user1@rhel9-1 ~]$ sudo rm -rf abc tes
+rm: cannot remove 'abc': Operation not permitted
+
+
+[root@rhel9-1 ~]# ls -l  /home/user1/
+total 0
+-rw-r--r--. 1 user1 user1  0 Sep 28 04:30 abc
+drwxr-xr-x. 2 user1 user1 18 Sep 28 04:08 test
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# rm -rf /home/user1/abc test
+rm: cannot remove '/home/user1/abc': Operation not permitted
+
+
+
+
+_________________________________________________________________________
+The `chattr` command in Unix-like operating systems, particularly in Linux, allows you to change the attributes of a file or directory. These attributes can have various effects on how the file or directory behaves and is treated by the system. Here are some of the most commonly used attributes that can be set with `chattr`:
+
+1. **Immutable (i):** When the immutable attribute is set on a file, it cannot be modified, deleted, renamed, or linked to by any user, including the root user. This is a powerful way to protect critical system files from accidental or malicious changes.
+
+   Example: `chattr +i filename`
+
+2. **Append-Only (a):** Files with the append-only attribute can only be opened for writing in append mode. This means you can add data to the end of the file but cannot modify or delete existing content.
+
+   Example: `chattr +a filename`
+
+3. **No Delete (d):** When the no delete attribute is set on a file, it cannot be deleted. This attribute is often used in combination with other attributes to create a more secure environment.
+
+   Example: `chattr +d filename`
+
+4. **No Update (u):** The no update attribute prevents a file from being updated (written to) unless the file is deleted first. This attribute is relatively rare and is not commonly used.
+
+   Example: `chattr +u filename`
+
+5. **No Dump (s):** The no dump attribute prevents a file or directory from being included in file system backups. This can be useful for temporary or cache files that don't need to be backed up.
+
+   Example: `chattr +s filename`
+
+6. **Compression (C):** The compression attribute is used to compress the file automatically. This is typically used with file systems that support transparent compression, such as Btrfs.
+
+   Example: `chattr +C filename`
+
+7. **Extended Attributes (X):** This attribute signifies that the file has extended attributes associated with it. Extended attributes are additional metadata that can be associated with a file.
+
+   Example: `chattr +X filename`
+
+8. **Undeletable (i) (E)**: The undeletable attribute combines the immutability and no delete attributes. It makes a file both immutable and undeletable.
+
+   Example: `chattr +iE filename`
+
+9. **Clear Attributes (–)**: You can use the minus sign (-) with `chattr` to remove specific attributes from a file or directory.
+
+   Example: `chattr -i filename`
+
+To use the `chattr` command, you typically need root or superuser privileges. Be cautious when setting these attributes, as they can affect the normal operation of your system, and misuse can lead to unexpected behavior.
+
+_________________________________________________________________________
+
+## using i option , we can't add , modify or delete anything 
+Immutable (i) : chattr +i filename
+
+[root@rhel9-1 ~]# chattr +i test
+[root@rhel9-1 ~]# lsattr test
+---------------------- test/new
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# lsattr -d test
+----i----------------- test
+[root@rhel9-1 ~]# touch test/new
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# rm -rf test
+rm: cannot remove 'test/new': Operation not permitted
+[root@rhel9-1 ~]# rm -rf test/new
+rm: cannot remove 'test/new': Operation not permitted
+[root@rhel9-1 ~]#
+
+
+## use -R option +i for recursively
+[root@rhel9-1 ~]# chattr -R +i test
+[root@rhel9-1 ~]# lsattr -d test
+----i----------------- test
+[root@rhel9-1 ~]# lsattr test
+----i----------------- test/abc
+[root@rhel9-1 ~]#
+
+
+[root@rhel9-1 ~]# chattr -R -i test
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# lsattr -d test
+---------------------- test
+[root@rhel9-1 ~]# lsattr test
+---------------------- test/abc
+
+
+[root@rhel9-1 ~]# lsattr abc
+----i----------------- abc
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# echo hello > abc
+-bash: abc: Operation not permitted
+[root@rhel9-1 ~]# echo hello >> abc
+-bash: abc: Operation not permitted
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# rm -rf abc
+rm: cannot remove 'abc': Operation not permitted
+
+
+
+_________________________________________________________________________
+
+Append-Only (a) : chattr +a filename 
+
+used for file only , y can give directory name but it has no use 
+
+[root@rhel9-1 ~]# ll
+total 8
+-rw-r--r--. 1 root root  16 Sep 28 09:35 abc
+-rw-------. 1 root root 811 Nov 25  2022 anaconda-ks.cfg
+drwxr-xr-x. 2 root root  17 Sep 28 09:40 test
+
+[root@rhel9-1 ~]# lsattr abc
+---------------------- abc
+[root@rhel9-1 ~]# lsattr -d test   ## -d for directory 
+---------------------- test
+
+[root@rhel9-1 ~]# chattr +a abc
+[root@rhel9-1 ~]# lsattr abc
+-----a---------------- abc
+
+
+## we can only append into file 
+[root@rhel9-1 ~]# echo hello > abc
+-bash: abc: Operation not permitted
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# echo hello >> abc
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# cat abc
+hello
+[root@rhel9-1 ~]# echo hello >> abc
+[root@rhel9-1 ~]# cat abc
+hello
+hello
+
+## vim will not work 
+## but when you exit from there using :q a new file will be created 
+root@rhel9-1 ~]# ll
+total 12
+-rw-r--r--. 1 root root  12 Sep 28 09:47 abc
+-rw-r--r--. 1 root root  12 Sep 28 10:03 abc~
+
+
+
+_________________________________________________________________________
+
+
+indirect changes impact 
+
+[root@rhel9-1 ~]# chattr +i /etc/passwd
+[root@rhel9-1 ~]# useradd ram
+useradd: cannot open /etc/passwd
+[root@rhel9-1 ~]# userdel user2
+userdel: cannot open /etc/passwd
+[root@rhel9-1 ~]#
+
+
+
+_________________________________________________________________________
+## lets see suid on chattr , so that all user can run this command 
+[root@rhel9-1 ~]# ls -l /usr/bin/chattr
+-rwxr-xr-x. 1 root root 69280 Jun  8  2022 /usr/bin/chattr
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# chmod 4755 /usr/bin/chattr
+[root@rhel9-1 ~]# ls -l /usr/bin/chattr
+-rwsr-xr-x. 1 root root 69280 Jun  8  2022 /usr/bin/chattr
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# chmod 755 /usr/bin/chattr
+[root@rhel9-1 ~]# ls -l /usr/bin/chattr
+-rwxr-xr-x. 1 root root 69280 Jun  8  2022 /usr/bin/chattr
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# chmod u+s  /usr/bin/chattr
+[root@rhel9-1 ~]# ls -l /usr/bin/chattr
+-rwsr-xr-x. 1 root root 69280 Jun  8  2022 /usr/bin/chattr
+
+## now login as user2 and check if it has sudo permission 
+## answer is no , but as on chattr sudid is applied we can use chattr and assign attribute 
+
+[root@rhel9-1 ~]# su - user2
+[user2@rhel9-1 ~]$ id user2
+uid=1002(user2) gid=1002(user2) groups=1002(user2)
+[user2@rhel9-1 ~]$ ll
+total 0
+[user2@rhel9-1 ~]$ touch abc
+[user2@rhel9-1 ~]$ chattr +i abc
+[user2@rhel9-1 ~]$ ll
+total 0
+-rw-r--r--. 1 user2 user2 0 Sep 29 06:54 abc
+[user2@rhel9-1 ~]$ rm -rf abc
+rm: cannot remove 'abc': Operation not permitted
+[user2@rhel9-1 ~]$ lsattr abc
+----i----------------- abc
+[user2@rhel9-1 ~]$
+
+_________________________________________________________________________
+
+[root@rhel9-1 ~]# sed -i.bkp '100a user2   ALL=(ALL)  /usr/bin/chattr' /etc/sudoers
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# grep user2 /etc/sudoers
+user2   ALL=(ALL)  /usr/bin/chattr
+
+
+_

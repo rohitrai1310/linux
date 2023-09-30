@@ -1,0 +1,367 @@
+
+Types of users in linux 
+
+super user 
+normal user 
+
+Types of prmissions in Linux ?
+1. File and dirctory based permissions ==> access ==> read write execute ==> pair 
+2. Command execution based permissions ==> using SUDO power or sudo user 
+
+1. default permissions or automatic permissions ===> using umask values
+2. custom permissions as per needs or use case ===> chmod or setfacl 
+
+
+if a user is in a group then prioroty will be like , first user self permissions then group permission
+
+##to add user
+useradd deepak
+useradd user1
+useradd user2
+
+tail -n3 /etc/passwd
+
+## to add group
+groupadd team
+
+## to add user in a group 
+usermod -G team user1
+usermod -G team user2
+grep team /etc/group
+team:x:1007:user1,user2
+
+
+## to delete user from group
+gpasswd -d user1 team
+gpasswd -d user2 team
+
+## to delete group 
+
+userdel team 
+
+## to delete user
+userdel -rf user1
+
+
+
+[root@rhel9-1 ~]# ls -ld /root/
+dr-xr-x---. 4 root root 4096 Sep 17 05:54 /root/
+
+normal user can't list anything in /root because other doesn't have any permission 
+r-x : user (owner)
+r-x : group 
+--- : other 
+
+chmod : to apply same permission to all user in other group 
+setfacl : to apply specific permission to user 
+
+============================================================
+default permissions : whenever you create any file or dirctory it creates with default permissions 
+
+Permissions ===> Three attributes 
+
+        symbolic code        Numeric code 
+Read    ==> r                ==> 4
+
+write   ==> w                ==> 2
+
+Execute ==> x                ==> 1
+
+node    ==> -                ==> 0
+
+
+read write execute  rwx  421 7
+
+read                r--  4-- 4
+
+                    r-x  4-1  5
+
+                    rw-  42-  6
+
+                    ---  --- 0
+
+============================================================
+explain this 
+[root@rhel9-1 ~]# ls -ld /root/
+dr-xr-x---. 4 root root 4096 Sep 17 05:54 /root/
+
+. means only chmod permissions 
++ setfact command is there  , ACL is applied 
+
+============================================================
+getfacl /root 
+
+file or dircoty ==> . three block 
+First block ==> owner 
+second block ==> group owner/members
+Third block ==> others users/groups or everyone or who are neither the owner nor members of a group 
+============================================================
+Note: 
+
+Owner - the user who creates and owns a file or folder 
+Group - all users who are member of the same group 
+Others - all other users on the system who are neither the owner nor the mebers of a group 
+============================================================
+Permissions apply :
+
+1- chmod ==> owner group others ==> but you can't menthoned the particuler user/groupname 
+
+2- setfacl ==> name based permissions ==> perticular user/groups
+
+
+##setfacl has more priority then chmod
+
+============================================================
+chmod owner group others <file or direcoty name>
+
+setfacl -m u:username:r-x  /data
+           g:groupname:rwx /data
+
+
+============================================================
+default permissions as per umask 
+
+root 
+
+Directory ==>   7      5        5
+               owner   group   others
+               rwx     r-x     r-x 
+
+File     ==>    6       4       4
+               owner   group   others
+               rw-     r--     r--             
+  
+normal users 
+
+Directory ==>   7      7        5
+               owner   group   others
+               rwx     rwx     r-x 
+
+File     ==>    6       6       4
+               owner   group   others
+               rw-     rw-     r--  
+
+
+============================================================ 
+umask value ?
+
+Umask always define the default permissions of any upcoming file or directory 
+
+===========================================================
+
+default umask value for super user account ==> 0 2 2
+
+default "  "   "  "   " normal user " ==>      0 0 2
+
+
+===========================================================
+
+root   ==> . default permissions 
+
+dircotry  ==>  7 7 7
+            -  0 2 2
+              =======
+               7 5 5
+              =======
+
+file  ==>      6 6 6
+            -  0 2 2
+              =======
+               6 4 4
+              =======
+
+
+===========================================================
+normal user   ==> . default permissions 
+
+dircotry  ==>  7 7 7
+            -  0 0 2
+              =======
+               7 7 5
+              =======
+
+file  ==>      6 6 6
+            -  0 0 2
+              =======
+               6 6 4
+              =======
+
+===========================================================
+## how to check umask value 
+
+[root@rhel9-1 ~]# umask
+0022
+
+[root@rhel9-1 ~]# ls -ld /redhat/
+drwxr-xr-x. 2 root root 6 Sep 23 15:17 /redhat/
+
+[root@rhel9-1 ~]# ls -l /fedora
+-rw-r--r--. 1 root root 0 Sep 23 15:18 /fedora
+
+### how to change umask value 
+
+[root@rhel9-1 ~]# umask 222    ## to temporary 
+[root@rhel9-1 ~]# umask
+0222
+
+[root@rhel9-1 ~]# mkdir /red
+
+[root@rhel9-1 ~]# touch /blue
+
+[root@rhel9-1 ~]# ls -ld /red
+dr-xr-xr-x. 2 root root 6 Sep 23 15:20 /red
+
+[root@rhel9-1 ~]# ls -l /blue
+-r--r--r--. 1 root root 0 Sep 23 15:20 /blue
+
+### to make umask permanent , it will individual user basis 
+
+vim ./bashrc 
+
+umask 222
+:wq
+
+main file is /etc/bashrc for umask , we can check there 
+
+===========================================================
+
+chown  does owner ship change
+chgrp  does group wonership change 
+
+===========================================================
+
+permissions ==> assign ==> chmod + setfacl
+ownership  ==>  assign ==> chown + chgrp 
+
+## at a time only one user can be owner of a file or directory 
+## at a time only one group can be group owner of a file or directory 
+
+===========================================================
+
+ ls -ld /redhat/
+drwxr-xr-x. 2 root root 6 Sep 23 15:17 /redhat/
+
+ls -l /fedora
+-rw-r--r--. 1 root root 0 Sep 23 15:18 /fedora
+
+2 for dirctory 
+1 for file 
+link or symbolic link 
+
+
+in every directory two hidden folder or function will be created . and .. 
+. current working directory 
+.. one level previous 
+
+
+[root@rhel9-1 ~]# ls -la /redhat/
+total 4
+drwxr-xr-x.  2 root root    6 Sep 23 15:17 .
+dr-xr-xr-x. 20 root root 4096 Sep 23 15:20 ..
+
+for file by default 1 because there is no link or file within file ( which is not possible ) so  1 by default
+
+
+
+
+[root@rhel9-1 ~]# mkdir /redhat/d1
+[root@rhel9-1 ~]# mkdir /redhat/d2
+[root@rhel9-1 ~]# mkdir /redhat/d3
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# touch /redhat/f1
+[root@rhel9-1 ~]# touch /redhat/f2
+[root@rhel9-1 ~]# touch /redhat/f3
+[root@rhel9-1 ~]#
+
+## 5 is count , only three dircoty will be added to 2 , no file gets count , so three directory is connected directly to redhat
+[root@rhel9-1 ~]# ls -ld /redhat/
+drwxr-xr-x. 5 root root 66 Sep 23 15:54 /redhat/
+[root@rhel9-1 ~]#
+
+
+[root@rhel9-1 ~]# ls -ld /redhat/d1
+drwxr-xr-x. 2 root root 6 Sep 23 15:54 /redhat/d1
+
+[root@rhel9-1 ~]# mkdir /redhat/d1/d1-1
+[root@rhel9-1 ~]# ls -ld /redhat/d1
+drwxr-xr-x. 3 root root 18 Sep 23 15:57 /redhat/d1
+
+
+## example , there are total 5 user in system 
+[root@rhel9-1 ~]# ls -ld /home/
+drwxr-xr-x. 7 root root 70 Sep 23 12:51 /home/
+
+
+## does file number also gets changed ??
+
+[root@rhel9-1 ~]# echo hello > /abc
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# cat /abc
+hello
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# ln /abc /new
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# cat /new
+hello
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# echo "India" >> /abc
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# cat /new
+hello
+India
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# echo "India" >> /new
+[root@rhel9-1 ~]# cat /abc
+hello
+India
+India
+[root@rhel9-1 ~]#
+
+## check here link or symbolic link count is 2
+## so whenever there is link count of file more then 1 then delete 1 from count , and that many hard link are there  
+[root@rhel9-1 ~]# ls -l /abc
+-rw-r--r--. 2 root root 18 Sep 23 16:02 /abc
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# ls -l /new
+-rw-r--r--. 2 root root 18 Sep 23 16:02 /new
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]#
+
+
+## new hard link , so 3 count 
+[root@rhel9-1 ~]# ln /abc /new2
+[root@rhel9-1 ~]#
+[root@rhel9-1 ~]# ls -l /new
+-rw-r--r--. 3 root root 18 Sep 23 16:02 /new
+
+## to find file , check i node number 
+
+[root@rhel9-1 ~]# ls -i /abc
+265215 /abc
+[root@rhel9-1 ~]# find / -inum 265215
+/abc
+/new
+/new2
+
+
+## use unlik /abc to unlink file 
+===========================================================
+
+
+
+===========================================================
+
+
+
+===========================================================
+
+
+===========================================================
+
+
+
+===========================================================
+
+
+
+===========================================================
