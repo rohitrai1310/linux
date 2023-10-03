@@ -1,0 +1,142 @@
+______________________________________________________________________________________________________________________
+
+how to check Permission applied on file or directory ?
+
+1. chmod    ==> owner group for all others but we can't give Permission on any particular user or any group 
+2. setfacl  ==> using this we can give Permission to any particular user or group
+
+
+how to know if acl is applied at the end ?
+
+wrxwrxwrx. : no acl 
+
+wrxwrxwrx+ : acl
+
+how to read Permission on a file or directory
+
+ls -l or ll 
+getfacl 
+stat 
+
+
+r-x : meaning user can ls (r) in a folder and go inside to that folder(x) 
+
+w : can create or delete item in folder 
+
+______________________________________________________________________________________________________________________
+
+ls -ld  for directory permission 
+ls -l 
+stat /root
+
+
+[root@rhel9-1 ~]# stat /root
+  File: /root
+  Size: 4096      	Blocks: 8          IO Block: 4096   directory
+Device: fd00h/64768d	Inode: 33554562    Links: 4
+Access: (0550/dr-xr-x---)  Uid: (    0/    root)   Gid: (    0/    root)
+Context: system_u:object_r:admin_home_t:s0
+Access: 2023-09-23 13:51:23.165837908 -0400
+Modify: 2023-09-17 05:54:41.522280528 -0400
+Change: 2023-09-17 05:54:41.522280528 -0400
+ Birth: 2022-11-25 04:18:35.083978962 -0500
+[root@rhel9-1 ~]#
+
+
+
+
+[root@rhel9-1 ~]# ls -ld /root/
+dr-xr-x---. 4 root root 4096 Sep 17 05:54 /root/
+
+chmod 750 /root
+
+task :
+create multiple user and add some user to root group and check permission 
+
+user has 7 : rwx 
+
+group 5 : r_x  (4_1)
+
+ohter : 0 
+
+______________________________________________________________________________________________________________________
+
+## this command will change permission of all file starting from xyz 
+chmod 646 /data/xyz*
+
+## same permission to all file/folder recursively  in data folder 
+chmod -R 777 /data
+
+
+______________________________________________________________________________________________________________________
+
+chmod : permissions can be applied using two way 
+
+1. Numeric method 
+2. symbolic method 
+ 
+chmod o+w /data
+chmod o-w /data
+
+chmod g+w,o+w /data
+chmod u-x,g-w,o-wx /data
+
+## you can use = sign to apply permission 
+## e.g.
+
+[root@rhel9-1 ~]# ls -ld /data
+drwxr-xr-x. 2 root root 6 Sep 30 11:14 /data
+
+[root@rhel9-1 ~]# chmod u=rwx,g=rwx,o=rwx /data
+[root@rhel9-1 ~]# ls -ld /data
+drwxrwxrwx. 2 root root 6 Sep 30 11:14 /data
+ 
+## g=rx will only keep r and x and remove w 
+[root@rhel9-1 ~]# chmod u=rwx,g=rx,o=rx /data
+[root@rhel9-1 ~]# ls -ld /data
+drwxr-xr-x. 2 root root 6 Sep 30 11:14 /data
+
+## a (all) is for user , group and other 
+[root@rhel9-1 ~]# chmod a=rwx /data
+[root@rhel9-1 ~]# ls -ld /data
+drwxrwxrwx. 2 root root 6 Sep 30 11:14 /data
+
+## will apply +x on user , group and other for all 
+[root@rhel9-1 ~]# chmod +x /data
+
+______________________________________________________________________________________________________________________
+
+only super user can perform chown and chgrp command in linux 
+
+[root@rhel9-1 ~]# ls -ld /data
+drwxr-xr-x. 2 root root 6 Sep 30 11:14 /data
+
+[root@rhel9-1 ~]# chown user2:root /data
+[root@rhel9-1 ~]# ls -ld /data
+drwxr-xr-x. 2 user2 root 6 Sep 30 11:14 /data
+
+
+[root@rhel9-1 ~]# chgrp user2 /data
+[root@rhel9-1 ~]# ls -ld /data
+drwxr-xr-x. 2 user2 user2 6 Sep 30 11:14 /data
+
+[root@rhel9-1 ~]# su - user2
+[user2@rhel9-1 ~]$ chown user1 /data
+chown: changing ownership of '/data': Operation not permitted
+[user2@rhel9-1 ~]$ chgrp user1 /data
+chgrp: changing group of '/data': Operation not permitted
+
+1:05
+
+______________________________________________________________________________________________________________________
+
+
+______________________________________________________________________________________________________________________
+
+
+
+______________________________________________________________________________________________________________________
+
+
+
+______________________________________________________________________________________________________________________
