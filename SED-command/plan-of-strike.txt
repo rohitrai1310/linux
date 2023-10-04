@@ -1,0 +1,42 @@
+What we have seen so far ?
+
+1st video : 
+
+Head and tail command and its example 
+
+2nd video:
+
+Sed command (steam editor) 
+
+Printing line using sed command 
+
+3rd video:
+
+Sed command (steam editor) … continue 
+
+deletion of lines using sed command 
+
+4th video: 
+
+How to insert line in a file ?
+	
+	1. How to insert text before a line ?
+    2. How to insert text after a line ?
+
+
+
+How to replace text in a file using sed command ?
+	1.  Replace First matched text 
+	2.  Global Replace 
+	3.  Match and Replace All Cases
+	4.  Match and replace specific occuerence in a line
+	5.  Replace First matched text in a specific Line Using the sed Command
+	6.  Replace all matched text in a specific Line Using the sed Command
+	7.  Replace String Only in Specific Range of Lines Using the sed Command
+	8.  Ignore Substrings
+	9.  Find and Replace Strings With Slashes
+	10. Find and Replace with Regular Expressions
+	11. Hack to replace   
+
+
+
