@@ -641,5 +641,95 @@ operator:x:11:0:operator:/network:/sbin/nologin
 [root@rhel9-1 ~]#
 
 
+https://phoenixnap.com/kb/sed-replace#ftoc-heading-1
+
+##sed example 
+
+cat > file1 << EOF
+AmarJackHanAmarJackHan
+Amar Jack han Amar Jack Han
+Amar Jack Han amar jack Han
+Amar Jack han Amar Jack han
+/Amar/Jack/Han /amar/jack/han
+EOF
+
+#Find and Replace Strings With Slashes
+sed 's/\/Amar\/Jack\/Han/\/Tom\/harry/g' file1  
+
+sed 's///' file1
+then V shape 
+
+## Alternatively, change the delimiter to avoid escaping characters
+sed 's:/Amar/Jack/Han:/tom/dick/harry:gi' file1
+
+ingnore case can be be i or I 
+
+## Ignore Substrings
+\b word boundaries 
+repalce only matching only the whole word Amar  with xyx 
+\bAmar\b
+[root@rhel9-1 ~]# sed 's/\/\bAmar\b/xyz/' file1
+AmarJackHanAmarJackHan
+Amar Jack han Amar Jack Han
+Amar Jack Han amar jack Han
+Amar Jack han Amar Jack han
+xyz/Jack/Han /amar/jack/han
+                OR 
+[root@rhel9-1 ~]# sed 's:\bAmar\b:xyz:' file1
+AmarJackHanAmarJackHan
+xyz Jack han Amar Jack Han
+xyz Jack Han amar jack Han
+xyz Jack han Amar Jack han
+/xyz/Jack/Han /amar/jack/han
+
+##\Amar with xyz
+
+[root@rhel9-1 ~]# sed 's/\/\bAmar\b/xyz/' file1
+AmarJackHanAmarJackHan
+Amar Jack han Amar Jack Han
+Amar Jack Han amar jack Han
+Amar Jack han Amar Jack han
+xyz/Jack/Han /amar/jack/han
 
 
+#Find and Replace with Regular Expressions 
+# not using -i or -i.backup 
+[A-Z] meaning replace one character anything from A to Z with @ 
+[root@rhel9-1 ~]# sed 's/[A-Z]/@/' file1
+@marJackHanAmarJackHan
+@mar Jack han Amar Jack Han
+@mar Jack Han amar jack Han
+@mar Jack han Amar Jack han
+/@mar/Jack/Han /amar/jack/han
+
+[root@rhel9-1 ~]# sed 's/[A-Z][a-z]/@/' file1
+@arJackHanAmarJackHan
+@ar Jack han Amar Jack Han
+@ar Jack Han amar jack Han
+@ar Jack han Amar Jack han
+/@ar/Jack/Han /amar/jack/han
+
+[root@rhel9-1 ~]# sed 's/[A-Z][a-z]/@#/' file1
+@#arJackHanAmarJackHan
+@#ar Jack han Amar Jack Han
+@#ar Jack Han amar jack Han
+@#ar Jack han Amar Jack han
+/@#ar/Jack/Han /amar/jack/han
+
+[root@rhel9-1 ~]# sed 's/[A-Z][a-z]/@#/g' file1
+@#ar@#ck@#n@#ar@#ck@#n
+@#ar @#ck han @#ar @#ck @#n
+@#ar @#ck @#n amar jack @#n
+@#ar @#ck han @#ar @#ck han
+/@#ar/@#ck/@#n /amar/jack/han
+
+
+-i tells the sed command to write the results to a file instead of standard output.
+s indicates the substitute command.
+/ is the most common delimiter character. The command also accepts other characters as delimiters, which is useful when the string contains forward slashes.
+<search regex> is the string or regular expression search parameter.
+<replacement> is the replacement text.
+g is the global replacement flag, which replaces all occurrences of a string instead of just the first.
+<input file> is the file where the search and replace happens.
+
+sed 's/<search regex>/<replacement>/g' <input file> > <output file>
